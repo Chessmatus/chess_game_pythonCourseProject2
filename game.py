@@ -1,20 +1,34 @@
 import pygame
 
 from const import *
+from board import Board
+from dragger import Dragger
 
 
 class Game:
     def __init__(self):
-        pass
+        self.board = Board()
+        self.dragger = Dragger()
 
-    def show_bg(self, surface):
+    def show_background(self, surface):
         for row in range(ROWS):
             for column in range(COLUMNS):
                 if (row + column) % 2 == 0:
-                    color = (234, 235, 200)
+                    color = (139, 87, 66)
                 else:
-                    color = (119, 154, 88)
+                    color = (255, 211, 155)
 
                 rect = (column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(surface, color, rect)
 
+    def show_pieces(self, surface):
+        for row in range(ROWS):
+            for column in range(COLUMNS):
+                # piece ?
+                if self.board.squares[row][column].has_piece():
+                    piece = self.board.squares[row][column].piece
+
+                    img = pygame.image.load(piece.texture)
+                    img_center = column * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
+                    piece.texture_rect = img.get_rect(center=img_center)
+                    surface.blit(img, piece.texture_rect)
