@@ -14,9 +14,9 @@ class Game:
         for row in range(ROWS):
             for column in range(COLUMNS):
                 if (row + column) % 2 == 0:
-                    color = (139, 87, 66)
-                else:
                     color = (255, 211, 155)
+                else:
+                    color = (139, 87, 66)
 
                 rect = (column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(surface, color, rect)
@@ -28,7 +28,22 @@ class Game:
                 if self.board.squares[row][column].has_piece():
                     piece = self.board.squares[row][column].piece
 
-                    img = pygame.image.load(piece.texture)
-                    img_center = column * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
-                    piece.texture_rect = img.get_rect(center=img_center)
-                    surface.blit(img, piece.texture_rect)
+                    # all pieces except dragger piece
+                    if piece is not self.dragger.piece:
+                        piece.set_texture(size=80)
+                        img = pygame.image.load(piece.texture)
+                        img_center = column * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
+                        piece.texture_rect = img.get_rect(center=img_center)
+                        surface.blit(img, piece.texture_rect)
+
+    def show_moves(self, surface):
+        if self.dragger.dragging:
+            piece = self.dragger.piece
+
+            for move in piece.moves:
+                # color
+                color = '#C86464' if (move.final.row + move.final.column) % 2 == 0 else '#C84646'
+                # rect
+                rect = (move.final.column * SQUARE_SIZE, move.final.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                # blit
+                pygame.draw.rect(surface, color, rect)
