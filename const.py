@@ -1,5 +1,6 @@
 WIDTH = 800
 HEIGHT = 800
+# FPS = 150
 
 ROWS = 8
 COLUMNS = 8

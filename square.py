@@ -5,6 +5,9 @@ class Square:
         self.column = column
         self.piece = piece
 
+    def __eq__(self, other):
+        return self.row == other.row and self.column == other.column
+
     def has_piece(self):
         return self.piece is not None
 
@@ -19,11 +22,11 @@ class Square:
         return self.isempty() or self.has_rival_piece(color)
 
     def has_team_piece(self, color):
-        return self.has_piece and self.piece.color == color
+        return self.has_piece() and self.piece.color == color
 
     def isempty(self):
         return not self.has_piece()
 
     def has_rival_piece(self, color):
-        return self.has_piece and self.piece.color != color
+        return self.has_piece() and self.piece.color != color
 

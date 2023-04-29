@@ -1,14 +1,19 @@
 import pygame
+import os
 
 from const import *
 from board import Board
 from dragger import Dragger
+from sound import Sound
 
 
 class Game:
     def __init__(self):
         self.board = Board()
+        self.next_player = 'white'
         self.dragger = Dragger()
+        self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
+        self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
 
     def show_background(self, surface):
         for row in range(ROWS):
@@ -31,7 +36,7 @@ class Game:
                     # all pieces except dragger piece
                     if piece is not self.dragger.piece:
                         piece.set_texture(size=80)
-                        img = pygame.image.load(piece.texture)
+                        img = pygame.image.load(piece.texture).convert_alpha()
                         img_center = column * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
                         piece.texture_rect = img.get_rect(center=img_center)
                         surface.blit(img, piece.texture_rect)
@@ -47,3 +52,25 @@ class Game:
                 rect = (move.final.column * SQUARE_SIZE, move.final.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 # blit
                 pygame.draw.rect(surface, color, rect)
+
+    def show_last_move(self, surface):
+        if self.board.last_move:
+            initial = self.board.last_move.initial
+            final = self.board.last_move.final
+
+            for pos in [initial, final]:
+                # color
+                color = (244, 247, 116) if (pos.row + pos.column) % 2 == 0 else (214, 207, 76)
+                # rect
+                rect = (pos.column * SQUARE_SIZE, pos.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                # blit
+                pygame.draw.rect(surface, color, rect)
+
+    def next_turn(self):
+        self.next_player = 'white' if self.next_player == 'black' else 'black'
+
+    def sound_effect(self, captured=False):
+        if captured:
+            self.capture_sound.play()
+        else:
+            self.move_sound.play()
