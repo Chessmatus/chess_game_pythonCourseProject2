@@ -84,7 +84,7 @@ class Main:
                             captured = board.squares[release_row][release_column].has_piece()
 
                             board.move(dragger.piece, move)
-                            board.set_false_en_passant(dragger.piece)
+                            # board.set_false_en_passant(dragger.piece)
                             # sound
                             self.game.sound_effect(captured)
                             # show methods
@@ -93,6 +93,7 @@ class Main:
                             self.game.show_pieces(self.screen)
                             # next turn
                             self.game.next_turn()
+                        dragger.piece.clear_moves()
 
                     dragger.undrag_piece()
 
