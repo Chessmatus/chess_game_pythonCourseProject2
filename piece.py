@@ -213,13 +213,15 @@ class King(Piece):
                         break
 
                     if col == 3:
+                        cut_king_move = Move(Square(row, column), Square(row, 3))
                         self.left_rook = left_rook
                         # rook move
                         move_rook = Move(Square(row, 0), Square(row, 3))
                         # king move
-                        move_king = (Square(row, column), Square(row, 2))
+                        move_king = Move(Square(row, column), Square(row, 2))
                         if bool:
-                            if not board.in_check(self, move_king) and not board.in_check(left_rook, move_rook):
+                            if not board.in_check(self, move_king) and not board.in_check(left_rook, move_rook) and \
+                               not board.in_check(self, cut_king_move):
                                 # append move rook
                                 left_rook.add_move(move_rook)
                                 # append move king
@@ -240,13 +242,15 @@ class King(Piece):
                         break
 
                     if col == 6:
+                        cut_king_move = Move(Square(row, column), Square(row, 5))
                         self.right_rook = right_rook
                         # rook move
                         move_rook = Move(Square(row, 7), Square(row, 5))
                         # king move
                         move_king = Move(Square(row, column), Square(row, 6))
                         if bool:
-                            if not board.in_check(self, move_king) and not board.in_check(right_rook, move_rook):
+                            if not board.in_check(self, move_king) and not board.in_check(right_rook, move_rook) and \
+                               not board.in_check(self, cut_king_move):
                                 # append move rook
                                 right_rook.add_move(move_rook)
                                 # append move king
