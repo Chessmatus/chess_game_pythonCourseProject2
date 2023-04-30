@@ -53,22 +53,22 @@ class Board:
         # calculates all the possible moves of a specific piece on a specific position
 
         if isinstance(piece, Pawn):
-            piece.pawn_moves(self, row, column)
+            piece.pawn_moves(self, row, column, bool)
 
         elif isinstance(piece, Knight):
-            piece.knight_moves(self, row, column)
+            piece.knight_moves(self, row, column, bool)
 
         elif isinstance(piece, Bishop):
-            piece.bishop_move(self, row, column)
+            piece.bishop_move(self, row, column, bool)
 
         elif isinstance(piece, Rook):
-            piece.rook_move(self, row, column)
+            piece.rook_move(self, row, column, bool)
 
         elif isinstance(piece, Queen):
-            piece.queen_move(self, row, column)
+            piece.queen_move(self, row, column, bool)
 
         elif isinstance(piece, King):
-            piece.king_moves(self, row, column)
+            piece.king_moves(self, row, column, bool)
 
     def check_promotion(self, piece, final):
         if final.row == 0 or final.row == 7:
@@ -118,7 +118,7 @@ class Board:
     def castling(self, initial, final):
         return abs(initial.column - final.column) == 2
 
-    '''def in_check(self, piece, move):
+    def in_check(self, piece, move):
         temp_piece = copy.deepcopy(piece)
         temp_board = copy.deepcopy(self)
         temp_board.move(temp_piece, move, testing=True)
@@ -132,7 +132,7 @@ class Board:
                         if isinstance(m.final.piece, King):
                             return True
 
-        return False'''
+        return False
 
     def valid_move(self, piece, move):
         return move in piece.moves

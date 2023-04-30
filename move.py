@@ -1,5 +1,6 @@
 from square import Square
 
+
 class Move:
 
     def __init__(self, initial, final):
@@ -12,7 +13,7 @@ class Move:
 
 class StraightLineMoves:
 
-    def __init__(self, board, piece, row, column, incrs):
+    def __init__(self, board, piece, row, column, incrs, bool=True):
         for incr in incrs:
             row_incr, col_incr = incr
             possible_move_row = row + row_incr
@@ -28,25 +29,23 @@ class StraightLineMoves:
 
                     # empty
                     if board.squares[possible_move_row][possible_move_col].isempty():
-                        piece.add_move(move)
-                        '''if bool:
-                            if not self.in_check(piece, move):
+                        if bool:
+                            if not board.in_check(piece, move):
                                 # append move
                                 piece.add_move(move)
                         else:
                             # append move
-                            piece.add_move(move)'''
+                            piece.add_move(move)
 
                     # has rival piece
                     elif board.squares[possible_move_row][possible_move_col].has_rival_piece(piece.color):
-                        piece.add_move(move)
-                        '''if bool:
-                            if not self.in_check(piece, move):
+                        if bool:
+                            if not board.in_check(piece, move):
                                 # append move
                                 piece.add_move(move)
                         else:
                             # append move
-                            piece.add_move(move)'''
+                            piece.add_move(move)
                         break
 
                     # has team piece
