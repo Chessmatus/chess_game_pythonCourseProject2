@@ -8,6 +8,9 @@ class Square:
     def __eq__(self, other):
         return self.row == other.row and self.column == other.column
 
+    def __str__(self):
+        return str(self.row) + " " + str(self.column)
+
     def has_piece(self):
         return self.piece is not None
 

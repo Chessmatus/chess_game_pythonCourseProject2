@@ -11,10 +11,16 @@ class Board:
 
     def __init__(self):
         self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for column in range(COLUMNS)]
-        self.last_move = None
+        self.next_player = 'white'
+        self.last_move_w = Move(Square(0, 0), Square(0, 0))
+        self.last_move_b = Move(Square(0, 0), Square(0, 0))
         self._create()
         self._add_pieces('white')
         self._add_pieces('black')
+
+    def last_move(self):
+        return None if self.last_move_w == Move(Square(0, 0), Square(0, 0)) \
+            else (self.last_move_w if self.next_player == 'black' else self.last_move_b)
 
     def _create(self):
         for row in range(ROWS):
@@ -113,7 +119,10 @@ class Board:
         piece.clear_moves()
 
         # remember last move
-        self.last_move = move
+        if self.next_player == 'white':
+            self.last_move_w = move
+        else:
+            self.last_move_b = move
 
     def castling(self, initial, final):
         return abs(initial.column - final.column) == 2

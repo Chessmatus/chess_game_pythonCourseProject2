@@ -1,5 +1,5 @@
 import pygame
-from const import *
+from game import *
 
 
 class Dragger:
@@ -31,8 +31,8 @@ class Dragger:
         self.mouseX, self.mouseY = pos
 
     def save_initial(self, pos):
-        self.initial_row = pos[1] // SQUARE_SIZE
-        self.initial_column = pos[0] // SQUARE_SIZE
+        self.initial_row = (pos[1] - DIFF) // SQUARE_SIZE
+        self.initial_column = (pos[0] - DIFF) // SQUARE_SIZE
 
     def drag_piece(self, piece):
         self.piece = piece

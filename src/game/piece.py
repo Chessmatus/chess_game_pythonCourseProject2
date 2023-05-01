@@ -1,5 +1,4 @@
 import os
-from square import Square
 from move import *
 
 
@@ -92,8 +91,8 @@ class Pawn(Piece):
             if board.squares[row][rival_piece_column].has_rival_piece(self.color):
                 p = board.squares[row][rival_piece_column].piece
                 if isinstance(p, Pawn):
-                    if board.last_move.initial == Square(initial_row - (p.dir * 2), rival_piece_column) and \
-                       board.last_move.final == Square(initial_row, rival_piece_column):
+                    if board.last_move().initial == Square(initial_row - (p.dir * 2), rival_piece_column) and \
+                       board.last_move().final == Square(initial_row, rival_piece_column):
                         move = Move(Square(row, column), Square(final_row, rival_piece_column, p))
                         if bool:
                             if not board.in_check(self, move):
