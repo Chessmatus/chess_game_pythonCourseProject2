@@ -1,5 +1,7 @@
+import copy
 import sys
 import pygame
+import pickle
 
 from const import *
 from game import Game
@@ -9,15 +11,12 @@ from move import Move
 from network import Network
 
 
-def read_last_move(string):
-    lis = string.split(" ")
-    move = Move(Square(int(lis[0]), int(lis[1])), Square(int(lis[2]), int(lis[3])))
-    return move
+def correct_move(board, color):
+    return board.last_move_b if color == 'white' else board.last_move_w
 
 
-def make_last_move(move):
-    return str(move.initial.row) + " " + str(move.initial.column) + " " + \
-        str(move.final.row) + " " + str(move.final.column) if move else ""
+def next_color(color):
+    return 'black' if color == 'white' else 'white'
 
 
 class Main:
@@ -28,18 +27,17 @@ class Main:
         pygame.display.set_caption('Chess')
         self.game = Game()
 
-
     def mainloop(self):
 
         n = Network()
         self.game.player_color = n.player_color
         print(self.game.player_color)
         dragger = self.game.dragger
-        # clock = pygame.time.Clock()
+        clock = pygame.time.Clock()
 
         while True:
             # show methods
-            # clock.tick(FPS)
+            clock.tick(FPS)
             self.game.show_board_background(self.screen)
             self.game.show_out_of_board_back(self.screen)
             self.game.show_coordinates(self.screen)
@@ -47,17 +45,17 @@ class Main:
             self.game.show_moves(self.screen)
             self.game.show_pieces(self.screen)
 
-            # if self.game.board.last_move():
-            if self.game.player_color == 'white':
-                move = n.send(make_last_move(self.game.board.last_move_w))
-                last_move = read_last_move(move)
-            else:
-                move = n.send(make_last_move(self.game.board.last_move_w))
-                last_move = read_last_move(move)
-
-            if not last_move == Move(Square(0, 0), Square(0, 0)) or last_move != (self.game.board.last_move_b if
-               self.game.player_color == 'white' else self.game.board.last_move_w):
-                self.game.get_move_on_board(self.screen, last_move)
+            board = n.send(self.game.board)
+            if board.last_move() and correct_move(board, self.game.player_color) != \
+                    correct_move(self.game.board, self.game.player_color):
+                print(board.last_move(), " : ", self.game.board.last_move())
+                self.game.board = board
+                print("-- ", board.last_move(), " : ", self.game.board.last_move())
+            # print(type(self.game.board))
+            '''last_move = n.send(self.game.board.last_move())
+            print(last_move, ": ", self.game.board.last_move())
+            if last_move != self.game.board.last_move():
+                self.game.get_move_on_board(self.screen, last_move)'''
 
             if dragger.dragging:
                 dragger.update_blit(self.screen)

@@ -12,15 +12,14 @@ class Board:
     def __init__(self):
         self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for column in range(COLUMNS)]
         self.next_player = 'white'
-        self.last_move_w = Move(Square(0, 0), Square(0, 0))
-        self.last_move_b = Move(Square(0, 0), Square(0, 0))
+        self.last_move_w = None
+        self.last_move_b = None
         self._create()
         self._add_pieces('white')
         self._add_pieces('black')
 
     def last_move(self):
-        return None if self.last_move_w == Move(Square(0, 0), Square(0, 0)) \
-            else (self.last_move_w if self.next_player == 'black' else self.last_move_b)
+        return self.last_move_w if self.next_player == 'black' else self.last_move_b
 
     def _create(self):
         for row in range(ROWS):

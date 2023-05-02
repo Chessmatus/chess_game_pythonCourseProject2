@@ -4,11 +4,9 @@ from move import *
 
 class Piece:
 
-    def __init__(self, name, color, value, texture=None, texture_rect=None):
+    def __init__(self, name, color, texture=None, texture_rect=None):
         self.name = name
         self.color = color
-        value_sign = 1 if color == 'white' else -1
-        self.value = value * value_sign
         self.moves = []
         self.moved = False
         self.texture = texture
@@ -37,7 +35,7 @@ class Pawn(Piece):
         else:
             self.dir = 1
         self.en_passant = False
-        super().__init__('pawn', color, 1.0)
+        super().__init__('pawn', color)
 
     def vertical_moves(self, board, row, column, steps, bool=True):
         # vertical moves
@@ -116,7 +114,7 @@ class Pawn(Piece):
 class Knight(Piece):
 
     def __init__(self, color):
-        super().__init__('knight', color, 3.0)
+        super().__init__('knight', color)
 
     def knight_moves(self, board, row, column, bool=True):
         # 8 possible moves
@@ -147,7 +145,7 @@ class Knight(Piece):
 class Bishop(Piece):
 
     def __init__(self, color):
-        super().__init__('bishop', color, 3.001)
+        super().__init__('bishop', color)
 
     def bishop_move(self, board, row, column, bool=True):
         StraightLineMoves(board, self, row, column, [(-1, 1), (-1, -1), (1, -1), (1, 1)], bool)
@@ -156,7 +154,7 @@ class Bishop(Piece):
 class Rook(Piece):
 
     def __init__(self, color):
-        super().__init__('rook', color, 5.0)
+        super().__init__('rook', color)
 
     def rook_move(self, board, row, column, bool=True):
         StraightLineMoves(board, self, row, column, [(-1, 0), (0, 1), (1, 0), (0, -1)], bool)
@@ -165,7 +163,7 @@ class Rook(Piece):
 class Queen(Piece):
 
     def __init__(self, color):
-        super().__init__('queen', color, 9.0)
+        super().__init__('queen', color)
 
     def queen_move(self, board, row, column, bool=True):
         StraightLineMoves(board, self, row, column,
@@ -177,7 +175,7 @@ class King(Piece):
     def __init__(self, color):
         self.left_rook = None
         self.right_rook = None
-        super().__init__('king', color, 10000.0)
+        super().__init__('king', color)
 
     def normal_moves(self, board, row, column, bool=True):
         adjs = [(row - 1, column + 0),

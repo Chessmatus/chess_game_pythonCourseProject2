@@ -1,4 +1,5 @@
 import socket
+import pickle
 
 
 class Network:
@@ -13,14 +14,14 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            return 'white' if self.client.recv(2048).decode() == '0' else 'black'
+            return 'white' if pickle.loads(self.client.recv(2048)) == '0' else 'black'
         except:
             pass
 
     def send(self, data):
         try:
-            self.client.send(str.encode(data))
-            return self.client.recv(2048).decode()
+            self.client.send(pickle.dumps(data))
+            return pickle.loads(self.client.recv(2048 * 6))
         except socket.error as e:
             print(e)
 

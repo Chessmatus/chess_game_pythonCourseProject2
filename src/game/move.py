@@ -8,7 +8,7 @@ class Move:
         self.final = final
 
     def __eq__(self, other):
-        return self.initial == other.initial and self.final == other.final
+        return False if other is None else (self.initial == other.initial and self.final == other.final)
 
     def __str__(self):
         return str(self.initial) + " " + str(self.final)

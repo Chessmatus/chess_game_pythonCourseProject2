@@ -1,9 +1,8 @@
 import socket
 from _thread import *
-import sys
+import pickle
 
-from move import Move
-from square import Square
+from board import Board
 
 
 server = "10.55.131.80"
@@ -19,45 +18,30 @@ except socket.error as e:
 s.listen(2)
 print("Waiting to connection, Server Started")
 
-
-def read_last_move(string):
-    if string:
-        lis = string.split(" ")
-        move = Move(Square(int(lis[0]), int(lis[1])), Square(int(lis[2]), int(lis[3])))
-    else:
-        move = ""
-    return move
-
-
-def make_last_move(move):
-    return str(move.initial.row) + " " + str(move.initial.column) + " " + \
-        str(move.final.row) + " " + str(move.final.column) if move else ""
-
-
+boards = [Board(), Board()]
 player = 0
-last_move = [None, None]
 
 
 def threaded_client(conn, pl):
-    conn.send(str.encode(str(pl)))
+    conn.send(pickle.dumps(str(pl)))
     reply = ""
     while True:
         try:
-            data = read_last_move(conn.recv(2048).decode())
-            last_move[pl] = data
+            data = pickle.loads(conn.recv(2048 * 6))
+            boards[pl] = data
 
             if not data:
-                print("Disconnected")
+                print("Waiting for move...")
                 break
             else:
-                if player == 1:
-                    reply = last_move[0]
+                if pl == 1:
+                    reply = boards[0]
                 else:
-                    reply = last_move[1]
-                # print("Received: ", data)
-                # print("Sending: ", reply)
+                    reply = boards[1]
+                # print(pl, ": Received: ", data.last_move())
+                # print(pl, ": Sending: ", reply.last_move())
 
-            conn.sendall(str.encode(make_last_move(reply)))
+            conn.sendall(pickle.dumps(reply))
 
         except:
             break
