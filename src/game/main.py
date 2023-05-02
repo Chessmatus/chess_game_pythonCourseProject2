@@ -1,7 +1,5 @@
-import copy
 import sys
 import pygame
-import pickle
 
 from const import *
 from game import Game
@@ -48,14 +46,11 @@ class Main:
             board = n.send(self.game.board)
             if board.last_move() and correct_move(board, self.game.player_color) != \
                     correct_move(self.game.board, self.game.player_color):
-                print(board.last_move(), " : ", self.game.board.last_move())
                 self.game.board = board
-                print("-- ", board.last_move(), " : ", self.game.board.last_move())
-            # print(type(self.game.board))
-            '''last_move = n.send(self.game.board.last_move())
-            print(last_move, ": ", self.game.board.last_move())
-            if last_move != self.game.board.last_move():
-                self.game.get_move_on_board(self.screen, last_move)'''
+                if self.game.board.is_mate():
+                    self.game.result = 'Lost'
+                elif self.game.board.is_stalemate() or self.game.board.not_enough_pieces():
+                    self.game.result = 'Draw'
 
             if dragger.dragging:
                 dragger.update_blit(self.screen)
@@ -71,7 +66,6 @@ class Main:
 
                     if Square.in_range(clicked_row, clicked_column):
                         self.mouse_down_board(clicked_row, clicked_column, event.pos)
-
 
                 # mouse motion
                 elif event.type == pygame.MOUSEMOTION:
@@ -146,6 +140,11 @@ class Main:
                 self.game.show_pieces(self.screen)
                 # next turn
                 self.game.next_turn()
+                dragger.piece.clear_moves()
+                if self.game.board.is_mate():
+                    self.game.result = 'Won'
+                elif self.game.board.is_stalemate() or self.game.board.not_enough_pieces():
+                    self.game.result = 'Draw'
             dragger.piece.clear_moves()
 
         dragger.undrag_piece()
@@ -153,5 +152,3 @@ class Main:
 
 main = Main()
 main.mainloop()
-
-# print(read_last_move("3 3 4 4"))

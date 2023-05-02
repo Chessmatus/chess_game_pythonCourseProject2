@@ -61,3 +61,8 @@ class StraightLineMoves:
 
                 possible_move_row += row_incr
                 possible_move_col += col_incr
+
+        if not len(piece.moves):
+            piece.can_be_moved = False
+        else:
+            piece.can_be_moved = True

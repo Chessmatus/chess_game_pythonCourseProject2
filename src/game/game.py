@@ -14,6 +14,7 @@ class Game:
         self.dragger = Dragger()
         self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
         self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
+        self.result = None
 
     def show_board_background(self, surface):
         for row in range(ROWS):
@@ -27,8 +28,52 @@ class Game:
                 pygame.draw.rect(surface, color, rect)
 
     def show_out_of_board_back(self, surface):
-        # rect_back = (ROWS * SQUARE_SIZE + 2 * DIFF, 0, WIDTH - BOARD_SIDE - 2 * DIFF, HEIGHT)
-        # pygame.draw.rect(surface, (51, 51, 51), rect_back)
+        rect_back = (ROWS * SQUARE_SIZE + 2 * DIFF, 0, WIDTH - BOARD_SIDE - 2 * DIFF, HEIGHT)
+        pygame.draw.rect(surface, (51, 51, 51), rect_back)
+
+        f = pygame.font.SysFont('arial', 15)
+        text_you = f.render('YOU:', True, WHITE)
+        text_opp = f.render('OPPONENT:', True, WHITE)
+        text_won = f.render('WON', True, WHITE)
+        text_lost = f.render('LOST', True, WHITE)
+        text_draw = f.render('DRAW', True, WHITE)
+
+        center = [(4 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
+                  (4 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
+        pos_you = text_you.get_rect(center=center[0]) if self.player_color == 'black' \
+            else text_you.get_rect(center=center[1])
+        pos_opp = text_opp.get_rect(center=center[0]) if self.player_color == 'white' \
+            else text_opp.get_rect(center=center[1])
+        surface.blit(text_you, pos_you)
+        surface.blit(text_opp, pos_opp)
+
+        if self.result:
+            center_1 = [(7 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
+                      (7 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
+            if self.result == 'Lost':
+                pos_lost = text_lost.get_rect(center=center_1[0]) if self.player_color == 'black' \
+                    else text_lost.get_rect(center=center_1[1])
+                pos_won = text_won.get_rect(center=center_1[0]) if self.player_color == 'white' \
+                    else text_won.get_rect(center=center_1[1])
+                surface.blit(text_won, pos_won)
+                surface.blit(text_lost, pos_lost)
+
+            elif self.result == 'Won':
+                pos_lost = text_lost.get_rect(center=center_1[0]) if self.player_color == 'white' \
+                    else text_lost.get_rect(center=center_1[1])
+                pos_won = text_won.get_rect(center=center_1[0]) if self.player_color == 'black' \
+                    else text_won.get_rect(center=center_1[1])
+                surface.blit(text_won, pos_won)
+                surface.blit(text_lost, pos_lost)
+
+            else:
+                pos_draw_1 = text_draw.get_rect(center=center_1[0])
+                pos_draw_2 = text_draw.get_rect(center=center_1[1])
+                surface.blit(text_draw, pos_draw_1)
+                surface.blit(text_draw, pos_draw_2)
+
+
+
         color_frame = (139,71,38)
         rect_up = (0, 0, BOARD_SIDE + 2 * DIFF, DIFF)
         rect_left = (0, DIFF, DIFF, BOARD_SIDE + DIFF)

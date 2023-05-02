@@ -1,7 +1,5 @@
 from const import *
-from square import Square
 from piece import *
-from move import Move
 import copy
 from sound import Sound
 import os
@@ -126,14 +124,17 @@ class Board:
     def castling(self, initial, final):
         return abs(initial.column - final.column) == 2
 
-    def in_check(self, piece, move):
-        temp_piece = copy.deepcopy(piece)
+    def in_check(self, piece=None, move=None):
         temp_board = copy.deepcopy(self)
-        temp_board.move(temp_piece, move, testing=True)
+        color = self.next_player
+        if move and piece:
+            temp_piece = copy.deepcopy(piece)
+            temp_board.move(temp_piece, move, testing=True)
+            color = piece.color
 
         for row in range(ROWS):
             for column in range(COLUMNS):
-                if temp_board.squares[row][column].has_rival_piece(piece.color):
+                if temp_board.squares[row][column].has_rival_piece(color):
                     p = temp_board.squares[row][column].piece
                     temp_board.calc_moves(p, row, column, bool=False)
                     for m in p.moves:
@@ -144,3 +145,50 @@ class Board:
 
     def valid_move(self, piece, move):
         return move in piece.moves
+
+    def is_mate(self):
+        if self.in_check():
+            for row in range(ROWS):
+                for col in range(COLUMNS):
+                    if isinstance(self.squares[row][col].piece, King) and \
+                            self.squares[row][col].piece.color == self.next_player:
+                        self.calc_moves(self.squares[row][col].piece, row, col)
+                        if not self.squares[row][col].piece.can_be_moved:
+                            return True
+
+        return False
+
+    def is_stalemate(self):
+        for row in range(ROWS):
+            for col in range(COLUMNS):
+                if self.squares[row][col].has_piece() and self.squares[row][col].piece.color == self.next_player:
+                    piece = self.squares[row][col].piece
+                    self.calc_moves(piece, row, col)
+                    if self.squares[row][col].piece.can_be_moved:
+                        return False
+
+        return True
+
+    def not_enough_pieces(self):
+        num_of_pieces = [0, 0]
+        for row in range(ROWS):
+            for col in range(COLUMNS):
+                if self.squares[row][col].has_piece():
+                    piece = self.squares[row][col].piece
+                    if isinstance(piece, Pawn):
+                        return False
+
+                    elif isinstance(piece, Knight):
+                        num_of_pieces[0] += 1
+
+                    elif isinstance(piece, Bishop):
+                        num_of_pieces[1] += 1
+
+                    elif isinstance(piece, Rook):
+                        return False
+
+                    elif isinstance(piece, Queen):
+                        return False
+
+        return True if num_of_pieces[0] + num_of_pieces[1] <= 1 else False
+

@@ -9,6 +9,7 @@ class Piece:
         self.color = color
         self.moves = []
         self.moved = False
+        self.can_be_moved = False
         self.texture = texture
         self.set_texture()
         self.texture_rect = texture_rect
@@ -110,6 +111,13 @@ class Pawn(Piece):
         # right en_passant
         self.en_passant_move(board, row, column, 'right', bool)
 
+        if not len(self.moves):
+            self.can_be_moved = False
+        else:
+            self.can_be_moved = True
+
+
+
 
 class Knight(Piece):
 
@@ -140,6 +148,11 @@ class Knight(Piece):
                     else:
                         # append move
                         self.add_move(move)
+
+        if not len(self.moves):
+            self.can_be_moved = False
+        else:
+            self.can_be_moved = True
 
 
 class Bishop(Piece):
@@ -264,5 +277,10 @@ class King(Piece):
         if not self.moved:
             self.long_castling(board, row, column, bool)
             self.short_castling(board, row, column, bool)
+
+        if not len(self.moves):
+            self.can_be_moved = False
+        else:
+            self.can_be_moved = True
 
 
