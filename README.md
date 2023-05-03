@@ -7,4 +7,10 @@
 
 2. Особенности игрового процесса:
    * При запуске игры открывается меню:
+
+![Меню](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo.png) 
+ 
+    * При нажатии на RESULTS:
+    
+
    
