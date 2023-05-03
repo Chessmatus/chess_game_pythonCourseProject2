@@ -32,4 +32,3 @@ class Square:
 
     def has_rival_piece(self, color):
         return self.has_piece() and self.piece.color != color
-

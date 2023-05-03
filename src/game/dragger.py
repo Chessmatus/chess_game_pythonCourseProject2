@@ -1,5 +1,4 @@
 from game import *
-import pygame
 
 
 class Dragger:

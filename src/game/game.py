@@ -1,9 +1,8 @@
+import pygame
+
 from const import *
 from board import Board
 from dragger import Dragger
-
-
-import pygame
 
 
 class Game:
@@ -61,14 +60,14 @@ class Game:
         text_opp_draw = f.render('OPPONENT(DRAW)', True, WHITE)
         text_you_draw = f.render('YOU(DRAW)', True, WHITE)
         text_waiting = f.render("WAITING FOR OPPONENT...", True, WHITE)
-        text_off_opp_draw = f.render("OPPONENT(OFFERED DRAW)", True, WHITE)
+        text_off_opp_draw = f.render("(OFFERED DRAW)", True, WHITE)
         text_off_you_draw = f.render("YOU(OFFERED DRAW)", True, WHITE)
         center_waiting = [(6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
                           (6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
 
         if self.connected():
-            for btn in btns:
-                btn.draw(surface)
+            for i in range(3):
+                btns[i].draw(surface)
             center = [(6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
                       (6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
 
@@ -128,6 +127,7 @@ class Game:
             pos_you = text_you.get_rect(center=center_waiting[0]) if self.player_color == 'black' \
                 else text_you.get_rect(center=center_waiting[1])
             surface.blit(text_you, pos_you)
+            btns[3].draw(surface)
 
         color_frame = (139,71,38)
         rect_up = (0, 0, BOARD_SIDE + 2 * DIFF, DIFF)
@@ -210,25 +210,3 @@ class Game:
 
     def next_turn(self):
         self.board.next_player = 'white' if self.board.next_player == 'black' else 'black'
-
-    '''def sound_effect(self, captured=False):
-        if captured:
-            self.capture_sound.play()
-        else:
-            self.move_sound.play()'''
-
-    '''def get_move_on_board(self, surface, move):
-        if self.board.squares[move.initial.row][move.initial.column].has_piece() and \
-                self.board.squares[move.initial.row][move.initial.column].piece.color == self.board.next_player:
-            piece = self.board.squares[move.initial.row][move.initial.column].piece
-            self.board.calc_moves(piece, move.initial.row, move.initial.column)
-            if self.board.valid_move(piece, move):
-                captured = self.board.squares[move.final.row][move.final.column].has_piece()
-                self.board.move(piece, move)
-                # sound
-                self.sound_effect(captured)
-                # show methods
-                self.show_game(surface, release=True)
-                # next turn
-                self.next_turn()
-            piece.clear_moves()'''

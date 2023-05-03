@@ -1,8 +1,5 @@
 import socket
 import pickle
-import copy
-from const import *
-# from server import host
 
 
 def get_self_hostname():

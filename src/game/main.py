@@ -1,4 +1,3 @@
-import sys
 import os
 import pygame
 
@@ -7,7 +6,6 @@ from buttons import Button
 from square import Square
 from move import Move
 from sound import Sound
-
 from network import Network
 
 
@@ -32,16 +30,20 @@ class Main:
         self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
         self.btns = []
         self.btns.append(Button("RESIGN", 4 * DIFF + COLUMNS * SQUARE_SIZE,
-                                DIFF + 3 * SQUARE_SIZE, (255, 0, 0), 100, 75, 20))
+                                DIFF + SQUARE_SIZE + SQUARE_SIZE // 2, (255, 0, 0), 100, 75, 20))
         self.btns.append(Button("DRAW", 4 * DIFF + COLUMNS * SQUARE_SIZE,
-                                DIFF + 4 * SQUARE_SIZE, (0, 255, 0), 100, 75, 20))
+                                DIFF + 3 * SQUARE_SIZE + SQUARE_SIZE // 2, (0, 255, 0), 100, 75, 20))
+        self.btns.append(Button("EXIT", 4 * DIFF + COLUMNS * SQUARE_SIZE,
+                                DIFF + 5 * SQUARE_SIZE + SQUARE_SIZE // 2, (0, 0, 255), 100, 75, 20))
+        self.btns.append(Button("BACK", 4 * DIFF + COLUMNS * SQUARE_SIZE,
+                                DIFF + 3 * SQUARE_SIZE + SQUARE_SIZE // 2, (0, 0, 255), 100, 75, 20))
 
     def menu_screen(self):
         run = True
         clock = pygame.time.Clock()
         btns = []
-        btns.append(Button("PLAY", WIDTH // 2, HEIGHT // 2, (255, 0, 0), 200, 50, 20))
-        btns.append(Button("RESULTS", WIDTH // 2 - 300, HEIGHT // 2, (255, 0, 0), 200, 50, 20))
+        btns.append(Button("PLAY", WIDTH // 3 - 100, HEIGHT // 2 - 25, (255, 0, 0), 200, 50, 20))
+        btns.append(Button("RESULTS", 2 * WIDTH // 3 - 100, HEIGHT // 2 - 25, (255, 0, 0), 200, 50, 20))
 
         while run:
             clock.tick(60)
@@ -162,10 +164,12 @@ class Main:
 
                         if Square.in_range(clicked_row, clicked_column):
                             self.mouse_down_board(clicked_row, clicked_column, event.pos)
-                        elif self.btns[0].click((dragger.mouseX, dragger.mouseY)):
+                        elif self.btns[0].click(event.pos):
                             self.game.result = 'Lost'
-                        elif self.btns[1].click((dragger.mouseX, dragger.mouseY)):
+                        elif self.btns[1].click(event.pos):
                             self.game.draw_offered_you = True
+                        elif self.btns[2].click(event.pos):
+                            run = False
 
                     # mouse motion
                     elif event.type == pygame.MOUSEMOTION:
@@ -174,6 +178,18 @@ class Main:
                     # click release
                     elif event.type == pygame.MOUSEBUTTONUP:
                         self.mouse_release(event.pos)
+
+                elif self.game.connected():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+
+                        if self.btns[2].click(event.pos):
+                            run = False
+
+                else:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+
+                        if self.btns[3].click(event.pos):
+                            run = False
 
                 # quit app
                 if event.type == pygame.QUIT:

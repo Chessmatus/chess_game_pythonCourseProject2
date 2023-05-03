@@ -1,8 +1,8 @@
 import socket
 from _thread import *
 import pickle
+
 from game import Game
-from const import *
 
 
 def get_self_hostname():
@@ -25,10 +25,6 @@ except socket.error as e:
 
 s.listen(4)
 print("Waiting to connection, Server Started")
-
-# boards = [Board(), Board()]
-
-
 games = {}
 id_count = 0
 
@@ -59,8 +55,6 @@ def threaded_client(conn, pl, g_id):
 
                     else:
                         reply = games[g_id][pl]
-                    # print(pl, ": Received: ", data.last_move())
-                    # print(pl, ": Sending: ", reply.last_move())
 
                 conn.sendall(pickle.dumps(reply))
 
