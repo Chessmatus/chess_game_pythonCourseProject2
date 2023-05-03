@@ -74,7 +74,7 @@
    ``` 
    cd chess_game_02
    git checkout -b dev origin/dev
-    cd src
+   cd src
    cd game
    python3 main.py
 
