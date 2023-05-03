@@ -1,12 +1,23 @@
 import socket
 import pickle
+import copy
+from const import *
+# from server import host
+
+
+def get_self_hostname():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    hostname = s.getsockname()[0]
+    s.close()
+    return hostname
 
 
 class Network:
 
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "10.55.131.80"
+        self.server = get_self_hostname()
         self.port = 5555
         self.addr = (self.server, self.port)
         self.player_color = self.connect()

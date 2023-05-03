@@ -11,8 +11,6 @@ class Game:
         self.board = Board()
         self.player_color = None
         self.dragger = Dragger()
-        # self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
-        # self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
         self.result = None
         self.draw_offered_opp = False
         self.draw_offered_you = False

@@ -1,18 +1,25 @@
 import socket
 from _thread import *
 import pickle
-
-from board import Board
 from game import Game
+from const import *
 
 
-server = "10.55.131.80"
+def get_self_hostname():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    hostname = s.getsockname()[0]
+    s.close()
+    return hostname
+
+
+host = get_self_hostname()
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
-    s.bind((server, port))
+    s.bind((host, port))
 except socket.error as e:
     print(e)
 

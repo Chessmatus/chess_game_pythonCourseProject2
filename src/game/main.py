@@ -22,6 +22,8 @@ def next_color(color):
 class Main:
 
     def __init__(self):
+        self.results = [0, 0, 0]
+        self.altered_result = False
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Chess')
@@ -29,8 +31,67 @@ class Main:
         self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
         self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
         self.btns = []
-        self.btns.append(Button("RESIGN", 4 * DIFF + COLUMNS * SQUARE_SIZE, DIFF + 3 * SQUARE_SIZE, (255, 0, 0)))
-        self.btns.append(Button("DRAW", 4 * DIFF + COLUMNS * SQUARE_SIZE, DIFF + 4 * SQUARE_SIZE, (0, 255, 0)))
+        self.btns.append(Button("RESIGN", 4 * DIFF + COLUMNS * SQUARE_SIZE,
+                                DIFF + 3 * SQUARE_SIZE, (255, 0, 0), 100, 75, 20))
+        self.btns.append(Button("DRAW", 4 * DIFF + COLUMNS * SQUARE_SIZE,
+                                DIFF + 4 * SQUARE_SIZE, (0, 255, 0), 100, 75, 20))
+
+    def menu_screen(self):
+        run = True
+        clock = pygame.time.Clock()
+        btns = []
+        btns.append(Button("PLAY", WIDTH // 2, HEIGHT // 2, (255, 0, 0), 200, 50, 20))
+        btns.append(Button("RESULTS", WIDTH // 2 - 300, HEIGHT // 2, (255, 0, 0), 200, 50, 20))
+
+        while run:
+            clock.tick(60)
+            self.screen.fill((128, 128, 128))
+            btns[0].draw(self.screen)
+            btns[1].draw(self.screen)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if btns[0].click(event.pos):
+                        run = False
+                    if btns[1].click(event.pos):
+                        self.get_results()
+        try:
+            self.mainloop()
+        except:
+            pass
+
+    def get_results(self):
+        run = True
+        font = pygame.font.SysFont("arial", 40)
+        text_wins = font.render(f"WINS: {self.results[0]}", True, WHITE)
+        text_draws = font.render(f"DRAWS: {self.results[1]}", True, WHITE)
+        text_loses = font.render(f"LOSES: {self.results[2]}", True, WHITE)
+        back_btn = Button("BACK", WIDTH // 2 - text_wins.get_width() // 2,
+                          HEIGHT // 2 - text_wins.get_height() // 2 + 200, (0, 255, 0), 175, 75, 40)
+
+        while run:
+            self.screen.fill((128, 128, 128))
+            self.screen.blit(text_wins, (WIDTH // 2 - text_wins.get_width() // 2,
+                                         HEIGHT // 2 - text_wins.get_height() // 2 - 100))
+            self.screen.blit(text_draws, (WIDTH // 2 - text_wins.get_width() // 2,
+                                          HEIGHT // 2 - text_wins.get_height() // 2))
+            self.screen.blit(text_loses, (WIDTH // 2 - text_wins.get_width() // 2,
+                                          HEIGHT // 2 - text_wins.get_height() // 2 + 100))
+            back_btn.draw(self.screen)
+
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if back_btn.click(event.pos):
+                        run = False
 
     def sound_effect(self, captured=False):
         if captured:
@@ -44,6 +105,7 @@ class Main:
         run = True
         connecting = True
         player_color = n.player_color
+        self.altered_result = False
 
         while run:
             # show methods
@@ -62,24 +124,26 @@ class Main:
                     break
 
             self.game.show_game(self.screen, self.btns)
-
-            board_res_off = n.send((self.game.board, self.game.result,
-                                    self.game.draw_offered_you, self.game.draw_offered_opp))
-            if board_res_off[1] == 'Lost':
-                self.game.result = 'Won'
-            elif board_res_off[1] == 'Draw':
-                self.game.result = 'Draw'
-            elif board_res_off[2] and not self.game.draw_offered_you:
-                self.game.draw_offered_opp = True
-            elif board_res_off[2] and self.game.draw_offered_you:
-                self.game.result = 'Draw'
-            if board_res_off[0].last_move() and correct_move(board_res_off[0], self.game.player_color) != \
-                    correct_move(self.game.board, self.game.player_color):
-                self.game.board = board_res_off[0]
-                if self.game.board.is_mate():
-                    self.game.result = 'Lost'
-                elif self.game.board.is_stalemate() or self.game.board.not_enough_pieces():
+            try:
+                board_res_off = n.send((self.game.board, self.game.result,
+                                        self.game.draw_offered_you, self.game.draw_offered_opp))
+                if board_res_off[1] == 'Lost':
+                    self.game.result = 'Won'
+                elif board_res_off[1] == 'Draw':
                     self.game.result = 'Draw'
+                elif board_res_off[2] and not self.game.draw_offered_you:
+                    self.game.draw_offered_opp = True
+                elif board_res_off[2] and self.game.draw_offered_you:
+                    self.game.result = 'Draw'
+                if board_res_off[0].last_move() and correct_move(board_res_off[0], self.game.player_color) != \
+                        correct_move(self.game.board, self.game.player_color):
+                    self.game.board = board_res_off[0]
+                    if self.game.board.is_mate():
+                        self.game.result = 'Lost'
+                    elif self.game.board.is_stalemate() or self.game.board.not_enough_pieces():
+                        self.game.result = 'Draw'
+            except:
+                run = False
 
             if self.game.connected() and not self.game.result:
 
@@ -114,9 +178,20 @@ class Main:
                 # quit app
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit()
+                    run = False
 
-            pygame.display.update()
+            if self.game.result and not self.altered_result:
+                if self.game.result == 'Won':
+                    self.results[0] += 1
+                elif self.game.result == 'Lost':
+                    self.results[2] += 1
+                else:
+                    self.results[1] += 1
+
+                self.altered_result = True
+
+            if run:
+                pygame.display.update()
 
     def mouse_down_board(self, clicked_row, clicked_column, pos):
         board = self.game.board
@@ -173,4 +248,8 @@ class Main:
 
 
 main = Main()
-main.mainloop()
+while True:
+    try:
+        main.menu_screen()
+    except:
+        break
