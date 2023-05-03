@@ -1,9 +1,8 @@
 from const import *
 from board import Board
 from dragger import Dragger
-from sound import Sound
 
-import os
+
 import pygame
 
 
@@ -12,9 +11,32 @@ class Game:
         self.board = Board()
         self.player_color = None
         self.dragger = Dragger()
-        self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
-        self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
+        # self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
+        # self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
         self.result = None
+        self.draw_offered_opp = False
+        self.draw_offered_you = False
+        self.ready = False
+        self.game_id = None
+
+    def connected(self):
+        return self.ready
+
+    def show_game(self, surface, btns, release=False):
+        if not self.connected():
+            self.show_board_background(surface)
+            self.show_out_of_board_back(surface, btns)
+            self.show_coordinates(surface)
+            self.show_pieces(surface)
+
+        else:
+            self.show_board_background(surface)
+            self.show_out_of_board_back(surface, btns)
+            self.show_coordinates(surface)
+            self.show_last_move(surface)
+            if not release:
+                self.show_moves(surface)
+            self.show_pieces(surface)
 
     def show_board_background(self, surface):
         for row in range(ROWS):
@@ -27,52 +49,87 @@ class Game:
                 rect = (column * SQUARE_SIZE + DIFF, row * SQUARE_SIZE + DIFF, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(surface, color, rect)
 
-    def show_out_of_board_back(self, surface):
+    def show_out_of_board_back(self, surface, btns, connected=False):
         rect_back = (ROWS * SQUARE_SIZE + 2 * DIFF, 0, WIDTH - BOARD_SIDE - 2 * DIFF, HEIGHT)
         pygame.draw.rect(surface, (51, 51, 51), rect_back)
 
         f = pygame.font.SysFont('arial', 15)
-        text_you = f.render('YOU:', True, WHITE)
-        text_opp = f.render('OPPONENT:', True, WHITE)
-        text_won = f.render('WON', True, WHITE)
-        text_lost = f.render('LOST', True, WHITE)
-        text_draw = f.render('DRAW', True, WHITE)
+        text_you = f.render('YOU', True, WHITE)
+        text_opp = f.render('OPPONENT', True, WHITE)
+        text_you_won = f.render('YOU(WON)', True, WHITE)
+        text_you_lost = f.render('YOU(LOST)', True, WHITE)
+        text_opp_lost = f.render('OPPONENT(LOST)', True, WHITE)
+        text_opp_won = f.render('OPPONENT(WON)', True, WHITE)
+        text_opp_draw = f.render('OPPONENT(DRAW)', True, WHITE)
+        text_you_draw = f.render('YOU(DRAW)', True, WHITE)
+        text_waiting = f.render("WAITING FOR OPPONENT...", True, WHITE)
+        text_off_opp_draw = f.render("OPPONENT(OFFERED DRAW)", True, WHITE)
+        text_off_you_draw = f.render("YOU(OFFERED DRAW)", True, WHITE)
+        center_waiting = [(6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
+                          (6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
 
-        center = [(4 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
-                  (4 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
-        pos_you = text_you.get_rect(center=center[0]) if self.player_color == 'black' \
-            else text_you.get_rect(center=center[1])
-        pos_opp = text_opp.get_rect(center=center[0]) if self.player_color == 'white' \
-            else text_opp.get_rect(center=center[1])
-        surface.blit(text_you, pos_you)
-        surface.blit(text_opp, pos_opp)
+        if self.connected():
+            for btn in btns:
+                btn.draw(surface)
+            center = [(6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
+                      (6 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
 
-        if self.result:
-            center_1 = [(7 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2),
-                      (7 * DIFF + (COLUMNS * SQUARE_SIZE), DIFF + SQUARE_SIZE // 2 + 7 * SQUARE_SIZE)]
-            if self.result == 'Lost':
-                pos_lost = text_lost.get_rect(center=center_1[0]) if self.player_color == 'black' \
-                    else text_lost.get_rect(center=center_1[1])
-                pos_won = text_won.get_rect(center=center_1[0]) if self.player_color == 'white' \
-                    else text_won.get_rect(center=center_1[1])
-                surface.blit(text_won, pos_won)
-                surface.blit(text_lost, pos_lost)
+            if self.result:
+                if self.result == 'Lost':
+                    pos_lost = text_you_lost.get_rect(center=center[0]) if self.player_color == 'black' \
+                        else text_you_lost.get_rect(center=center[1])
+                    pos_won = text_opp_won.get_rect(center=center[0]) if self.player_color == 'white' \
+                        else text_opp_won.get_rect(center=center[1])
+                    surface.blit(text_opp_won, pos_won)
+                    surface.blit(text_you_lost, pos_lost)
 
-            elif self.result == 'Won':
-                pos_lost = text_lost.get_rect(center=center_1[0]) if self.player_color == 'white' \
-                    else text_lost.get_rect(center=center_1[1])
-                pos_won = text_won.get_rect(center=center_1[0]) if self.player_color == 'black' \
-                    else text_won.get_rect(center=center_1[1])
-                surface.blit(text_won, pos_won)
-                surface.blit(text_lost, pos_lost)
+                elif self.result == 'Won':
+                    pos_lost = text_opp_lost.get_rect(center=center[0]) if self.player_color == 'white' \
+                        else text_opp_lost.get_rect(center=center[1])
+                    pos_won = text_you_won.get_rect(center=center[0]) if self.player_color == 'black' \
+                        else text_you_won.get_rect(center=center[1])
+                    surface.blit(text_you_won, pos_won)
+                    surface.blit(text_opp_lost, pos_lost)
+
+                else:
+                    pos_draw_1 = text_opp_draw.get_rect(center=center[0]) if self.player_color == 'white' \
+                        else text_opp_draw.get_rect(center=center[1])
+                    pos_draw_2 = text_you_draw.get_rect(center=center[0]) if self.player_color == 'black' \
+                        else text_you_draw.get_rect(center=center[1])
+                    surface.blit(text_you_draw, pos_draw_2)
+                    surface.blit(text_opp_draw, pos_draw_1)
+
+            elif self.draw_offered_you or self.draw_offered_opp:
+                if self.draw_offered_you:
+                    pos_you = text_off_you_draw.get_rect(center=center[0]) if self.player_color == 'black' \
+                        else text_off_you_draw.get_rect(center=center[1])
+                    surface.blit(text_off_you_draw, pos_you)
+                    pos_opp = text_opp.get_rect(center=center[0]) if self.player_color == 'white' \
+                        else text_opp.get_rect(center=center[1])
+                    surface.blit(text_opp, pos_opp)
+                if self.draw_offered_opp:
+                    pos_you = text_you.get_rect(center=center[0]) if self.player_color == 'black' \
+                        else text_you.get_rect(center=center[1])
+                    surface.blit(text_you, pos_you)
+                    pos_opp = text_off_opp_draw.get_rect(center=center[0]) if self.player_color == 'white' \
+                        else text_off_opp_draw.get_rect(center=center[1])
+                    surface.blit(text_off_opp_draw, pos_opp)
 
             else:
-                pos_draw_1 = text_draw.get_rect(center=center_1[0])
-                pos_draw_2 = text_draw.get_rect(center=center_1[1])
-                surface.blit(text_draw, pos_draw_1)
-                surface.blit(text_draw, pos_draw_2)
+                pos_you = text_you.get_rect(center=center[0]) if self.player_color == 'black' \
+                    else text_you.get_rect(center=center[1])
+                surface.blit(text_you, pos_you)
+                pos_opp = text_opp.get_rect(center=center[0]) if self.player_color == 'white' \
+                    else text_opp.get_rect(center=center[1])
+                surface.blit(text_opp, pos_opp)
 
-
+        else:
+            pos_waiting = text_waiting.get_rect(center=center_waiting[0]) if self.player_color == 'white' \
+                else text_waiting.get_rect(center=center_waiting[1])
+            surface.blit(text_waiting, pos_waiting)
+            pos_you = text_you.get_rect(center=center_waiting[0]) if self.player_color == 'black' \
+                else text_you.get_rect(center=center_waiting[1])
+            surface.blit(text_you, pos_you)
 
         color_frame = (139,71,38)
         rect_up = (0, 0, BOARD_SIDE + 2 * DIFF, DIFF)
@@ -156,13 +213,13 @@ class Game:
     def next_turn(self):
         self.board.next_player = 'white' if self.board.next_player == 'black' else 'black'
 
-    def sound_effect(self, captured=False):
+    '''def sound_effect(self, captured=False):
         if captured:
             self.capture_sound.play()
         else:
-            self.move_sound.play()
+            self.move_sound.play()'''
 
-    def get_move_on_board(self, surface, move):
+    '''def get_move_on_board(self, surface, move):
         if self.board.squares[move.initial.row][move.initial.column].has_piece() and \
                 self.board.squares[move.initial.row][move.initial.column].piece.color == self.board.next_player:
             piece = self.board.squares[move.initial.row][move.initial.column].piece
@@ -173,11 +230,7 @@ class Game:
                 # sound
                 self.sound_effect(captured)
                 # show methods
-                self.show_board_background(surface)
-                self.show_out_of_board_back(surface)
-                self.show_coordinates(surface)
-                self.show_last_move(surface)
-                self.show_pieces(surface)
+                self.show_game(surface, release=True)
                 # next turn
                 self.next_turn()
-            piece.clear_moves()
+            piece.clear_moves()'''

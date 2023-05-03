@@ -1,10 +1,12 @@
 import sys
+import os
 import pygame
 
 from const import *
-from game import Game
+from buttons import Button
 from square import Square
 from move import Move
+from sound import Sound
 
 from network import Network
 
@@ -23,57 +25,91 @@ class Main:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Chess')
-        self.game = Game()
+        self.game = None
+        self.move_sound = Sound(os.path.join('assets/sounds/move.wav'))
+        self.capture_sound = Sound(os.path.join('assets/sounds/capture.wav'))
+        self.btns = []
+        self.btns.append(Button("RESIGN", 4 * DIFF + COLUMNS * SQUARE_SIZE, DIFF + 3 * SQUARE_SIZE, (255, 0, 0)))
+        self.btns.append(Button("DRAW", 4 * DIFF + COLUMNS * SQUARE_SIZE, DIFF + 4 * SQUARE_SIZE, (0, 255, 0)))
+
+    def sound_effect(self, captured=False):
+        if captured:
+            self.capture_sound.play()
+        else:
+            self.move_sound.play()
 
     def mainloop(self):
-
-        n = Network()
-        self.game.player_color = n.player_color
-        print(self.game.player_color)
-        dragger = self.game.dragger
         clock = pygame.time.Clock()
+        n = Network()
+        run = True
+        connecting = True
+        player_color = n.player_color
 
-        while True:
+        while run:
             # show methods
             clock.tick(FPS)
-            self.game.show_board_background(self.screen)
-            self.game.show_out_of_board_back(self.screen)
-            self.game.show_coordinates(self.screen)
-            self.game.show_last_move(self.screen)
-            self.game.show_moves(self.screen)
-            self.game.show_pieces(self.screen)
+            if connecting:
+                try:
+                    game = n.send("get")
+                    self.game = game
+                    self.game.player_color = player_color
+                    dragger = self.game.dragger
+                    if self.game.connected():
+                        connecting = False
+                except:
+                    run = False
+                    print("Couldn't get game")
+                    break
 
-            board = n.send(self.game.board)
-            if board.last_move() and correct_move(board, self.game.player_color) != \
+            self.game.show_game(self.screen, self.btns)
+
+            board_res_off = n.send((self.game.board, self.game.result,
+                                    self.game.draw_offered_you, self.game.draw_offered_opp))
+            if board_res_off[1] == 'Lost':
+                self.game.result = 'Won'
+            elif board_res_off[1] == 'Draw':
+                self.game.result = 'Draw'
+            elif board_res_off[2] and not self.game.draw_offered_you:
+                self.game.draw_offered_opp = True
+            elif board_res_off[2] and self.game.draw_offered_you:
+                self.game.result = 'Draw'
+            if board_res_off[0].last_move() and correct_move(board_res_off[0], self.game.player_color) != \
                     correct_move(self.game.board, self.game.player_color):
-                self.game.board = board
+                self.game.board = board_res_off[0]
                 if self.game.board.is_mate():
                     self.game.result = 'Lost'
                 elif self.game.board.is_stalemate() or self.game.board.not_enough_pieces():
                     self.game.result = 'Draw'
 
-            if dragger.dragging:
-                dragger.update_blit(self.screen)
+            if self.game.connected() and not self.game.result:
+
+                if dragger.dragging:
+                    dragger.update_blit(self.screen)
 
             for event in pygame.event.get():
+                if self.game.connected() and not self.game.result:
 
-                # click
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    dragger.update_mouse(event.pos)
+                    # click
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        dragger.update_mouse(event.pos)
 
-                    clicked_row = (dragger.mouseY - DIFF) // SQUARE_SIZE
-                    clicked_column = (dragger.mouseX - DIFF) // SQUARE_SIZE
+                        clicked_row = (dragger.mouseY - DIFF) // SQUARE_SIZE
+                        clicked_column = (dragger.mouseX - DIFF) // SQUARE_SIZE
 
-                    if Square.in_range(clicked_row, clicked_column):
-                        self.mouse_down_board(clicked_row, clicked_column, event.pos)
+                        if Square.in_range(clicked_row, clicked_column):
+                            self.mouse_down_board(clicked_row, clicked_column, event.pos)
+                        elif self.btns[0].click((dragger.mouseX, dragger.mouseY)):
+                            self.game.result = 'Lost'
+                        elif self.btns[1].click((dragger.mouseX, dragger.mouseY)):
+                            self.game.draw_offered_you = True
 
-                # mouse motion
-                elif event.type == pygame.MOUSEMOTION:
-                    self.mouse_motion(event.pos)
+                    # mouse motion
+                    elif event.type == pygame.MOUSEMOTION:
+                        self.mouse_motion(event.pos)
 
-                # click release
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    self.mouse_release(event.pos)
+                    # click release
+                    elif event.type == pygame.MOUSEBUTTONUP:
+                        self.mouse_release(event.pos)
 
                 # quit app
                 if event.type == pygame.QUIT:
@@ -93,24 +129,14 @@ class Main:
                 dragger.save_initial(pos)
                 dragger.drag_piece(piece)
                 # show methods
-                self.game.show_board_background(self.screen)
-                self.game.show_out_of_board_back(self.screen)
-                self.game.show_coordinates(self.screen)
-                self.game.show_last_move(self.screen)
-                self.game.show_moves(self.screen)
-                self.game.show_pieces(self.screen)
+                self.game.show_game(self.screen, self.btns)
 
     def mouse_motion(self, pos):
         dragger = self.game.dragger
         if dragger.dragging:
             dragger.update_mouse(pos)
             # show methods
-            self.game.show_board_background(self.screen)
-            self.game.show_out_of_board_back(self.screen)
-            self.game.show_coordinates(self.screen)
-            self.game.show_last_move(self.screen)
-            self.game.show_moves(self.screen)
-            self.game.show_pieces(self.screen)
+            self.game.show_game(self.screen, self.btns)
             dragger.update_blit(self.screen)
 
     def mouse_release(self, pos):
@@ -131,13 +157,9 @@ class Main:
                 captured = board.squares[release_row][release_column].has_piece()
                 board.move(dragger.piece, move)
                 # sound
-                self.game.sound_effect(captured)
+                self.sound_effect(captured)
                 # show methods
-                self.game.show_board_background(self.screen)
-                self.game.show_out_of_board_back(self.screen)
-                self.game.show_coordinates(self.screen)
-                self.game.show_last_move(self.screen)
-                self.game.show_pieces(self.screen)
+                self.game.show_game(self.screen, self.btns, release=True)
                 # next turn
                 self.game.next_turn()
                 dragger.piece.clear_moves()

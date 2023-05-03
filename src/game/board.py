@@ -15,6 +15,7 @@ class Board:
         self._create()
         self._add_pieces('white')
         self._add_pieces('black')
+        # self.result = None
 
     def last_move(self):
         return self.last_move_w if self.next_player == 'black' else self.last_move_b

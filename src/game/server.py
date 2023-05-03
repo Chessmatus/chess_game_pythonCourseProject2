@@ -3,6 +3,7 @@ from _thread import *
 import pickle
 
 from board import Board
+from game import Game
 
 
 server = "10.55.131.80"
@@ -15,38 +16,60 @@ try:
 except socket.error as e:
     print(e)
 
-s.listen(2)
+s.listen(4)
 print("Waiting to connection, Server Started")
 
-boards = [Board(), Board()]
-player = 0
+# boards = [Board(), Board()]
 
 
-def threaded_client(conn, pl):
+games = {}
+id_count = 0
+
+
+def threaded_client(conn, pl, g_id):
+    global id_count
     conn.send(pickle.dumps(str(pl)))
     reply = ""
     while True:
         try:
-            data = pickle.loads(conn.recv(2048 * 6))
-            boards[pl] = data
+            data = pickle.loads(conn.recv(2048 * 8))
+            if g_id in games:
 
-            if not data:
-                print("Waiting for move...")
-                break
-            else:
-                if pl == 1:
-                    reply = boards[0]
+                if not data:
+                    break
                 else:
-                    reply = boards[1]
-                # print(pl, ": Received: ", data.last_move())
-                # print(pl, ": Sending: ", reply.last_move())
+                    if data != 'get':
+                        games[g_id][pl].board = data[0]
+                        games[g_id][pl].result = data[1]
+                        games[g_id][pl].draw_offered_you = data[2]
+                        games[g_id][pl].draw_offered_opp = data[3]
+                        if pl == 1:
+                            reply = (games[g_id][0].board, games[g_id][0].result,
+                                     games[g_id][0].draw_offered_you, games[g_id][0].draw_offered_opp)
+                        else:
+                            reply = (games[g_id][1].board, games[g_id][1].result,
+                                     games[g_id][1].draw_offered_you, games[g_id][1].draw_offered_opp)
 
-            conn.sendall(pickle.dumps(reply))
+                    else:
+                        reply = games[g_id][pl]
+                    # print(pl, ": Received: ", data.last_move())
+                    # print(pl, ": Sending: ", reply.last_move())
+
+                conn.sendall(pickle.dumps(reply))
+
+            else:
+                break
 
         except:
             break
 
-    print("Lost Connection")
+    print("Lost Connection: ", pl)
+    try:
+        del games[g_id]
+        print("Closing Game", g_id)
+    except:
+        pass
+    id_count -= 1
     conn.close()
 
 
@@ -54,5 +77,16 @@ while True:
     conn, addr = s.accept()
     print("Connected to:", addr)
 
-    start_new_thread(threaded_client, (conn, player))
-    player += 1
+    id_count += 1
+    player = 0
+    game_id = (id_count - 1) // 2
+    if id_count % 2 == 1:
+        games[game_id] = (Game(), Game())
+        games[game_id][player].game_id = game_id
+    else:
+        player = 1
+        games[game_id][player].ready = True
+        games[game_id][player - 1].ready = True
+        games[game_id][player].game_id = game_id
+
+    start_new_thread(threaded_client, (conn, player, game_id))
