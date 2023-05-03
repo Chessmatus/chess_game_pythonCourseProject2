@@ -55,6 +55,8 @@
    cd chess_game_02
    git checkout -b dev origin/dev
    pip install -r requirements.txt
+   cd src
+   cd game
    python3 server.py
    
   * Первый игрок: открываем новое окно терминала (не закрываем предыдущее!) и выполняем:
@@ -62,6 +64,8 @@
    ``` 
    cd chess_game_02
    git checkout -b dev origin/dev
+   cd src
+   cd game
    python3 main.py
    ```
    
@@ -70,6 +74,8 @@
    ``` 
    cd chess_game_02
    git checkout -b dev origin/dev
+    cd src
+   cd game
    python3 main.py
 
  
