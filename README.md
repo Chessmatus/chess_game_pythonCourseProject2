@@ -9,8 +9,70 @@
    * При запуске игры открывается меню:
 
 ![Меню](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo.png) 
+
+   * При нажатии на RESULTS при входе:
+
+![Начальные результаты](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo1.png) 
+
+   * Нажимая на BACK, возвращаемся в главное меню
+   * При нажатии на PLAY, открывается окно ожидания соперника (если уже есть готовый соперник, то сразу откроется окно игры):
+
+![Окно ожидания](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo2.png) 
+
+   * Как только второй игрок подключился, открывается окно игры (скриншот после нескольких ходов):
+
+![Окно игры](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo3.png) 
+
+   * При нажатии на кнопку DRAW, игрок предлагает второму игроку ничью. Предложение отобразится у оппонента:
+
+![Предложение ничьи](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/pgoto4.png) 
+
+   * Оппонент, нажимая на DRAW примет ничью. Результат отобразится рядом с "именами" и позиция "заморозится":
+
+![Фиксирование ничьи](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo5.png) 
+
+   * Помимо этого, ничья фиксируется автоматически при недостаточном количестве материала либо пате.
+   * Нажимая на кнопку RESIGN, игрок сдает партию. Результат отображается и позиция замораживается:
+
+![Сдача партии](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo6.png)
+
+   * Помимо этого, если один игрок поставил мат, то результат отображается автоматически.
+   * После фиксирования результата, нажимая на кнопку EXIT, игроки возвращаются в главное меню (возвращение происходит при нажатии хотя бы одним игроком кнопки EXIT).
+   * Результаты сохраняются, и их можно посмотреть нажав на кнопку RESULTS:
+
+![Обновленные результаты](https://github.com/Chessmatus/chess_game_02/blob/dev/screenshots/photo7.png)
+
+3. Замечания:
+   * Игра поддерживает все базовые правила шахмат (подтверждаю как FIDE Master)
+   * Подразумевается, что тестирование игры по сети будет проводится с одного устройства (запуская main.py несколько раз после запуска сервера)
+   * При желании проверить взаимодействие внутри локальной сети с разных устройств, нужно выбрать одно устройство сервером (запустить на нем server.py), но до этого в файле network.py, в классе Network изменить self.server = "_._._._" (на hostname выбранного устройства)
+
+4. Запуск:
+   * Запуск сервера:
+   
+   ```
+   git clone https://github.com/Chessmatus/chess_game_02.git 
+   cd chess_game_02
+   git checkout -b dev origin/dev
+   pip install -r requirements.txt
+   python3 server.py
+   
+  * Первый игрок: открываем новое окно терминала (не закрываем предыдущее!) и выполняем:
+   
+   ``` 
+   cd chess_game_02
+   git checkout -b dev origin/dev
+   python3 main.py
+   ```
+   
+ * Второй игрок: открываем новое окно терминала (не закрываем предыдущее!) и выполняем:
+  
+   ``` 
+   cd chess_game_02
+   git checkout -b dev origin/dev
+   python3 main.py
+
  
-    * При нажатии на RESULTS:
     
 
    
